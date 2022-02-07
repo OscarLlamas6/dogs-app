@@ -1,115 +1,101 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * Generated with the TypeScript template
- * https://github.com/react-native-community/react-native-template-typescript
- *
- * @format
- */
-
-import React from 'react';
+import React, { useEffect, useState } from "react";
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
   View,
-} from 'react-native';
+  Text,
+  StyleSheet,
+  StatusBar,
+  FlatList,
+  TextInput,
+} from "react-native";
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 
-const Section: React.FC<{
-  title: string;
-}> = ({children, title}) => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+import DogItem from "./src/components/DogItem";
+
+
 
 const App = () => {
-  const isDarkMode = useColorScheme() === 'dark';
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+    const [dogs, setDogs] = useState<any[]>([]);
+    const [refreshing, setRefreshing] = useState<any>(false);
+    const [search, setSearch] = useState<any>("");
 
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+    const loadData = async () => {
+        const res = await fetch(
+            `https://dog.ceo/api/breed/${search}/images`
+          );
+          const data = await res.json();
+          setDogs(data.message)
+      };
+    
+    useEffect(() => {
+    loadData();
+    }, [search]);
+
+    return (
+        <View style={styles.container}>
+          <StatusBar backgroundColor="#141414" />
+    
+          <View style={styles.header}>
+            <Text style={styles.title}>DogApp - Paggo</Text>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search a breed"
+              placeholderTextColor="#858585"
+              onChangeText={(text) => text && setSearch(text)}
+            />
+          </View>
+    
+        <FlatList
+        style={styles.list}
+        data={dogs}
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => <DogItem dogImage={item} dogName={search} />}
+        refreshing={refreshing}
+        onRefresh={async () => {
+          setRefreshing(true);
+          await loadData();
+          setRefreshing(false);
+        }}
+      />
+
+
         </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
+      );
+  
 };
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+    container: {
+      backgroundColor: "#141414",
+      flex: 1,
+      alignItems: "center",
+    },
+    header: {
+      flexDirection: "row",
+      width: "90%",
+      justifyContent: "space-between",
+      marginBottom: 10,
+    },
+    title: {
+      fontSize: 20,
+      color: "#fff",
+      marginTop: 10,
+    },
+    list: {
+      width: "90%",
+    },
+    searchInput: {
+      color: "#fff",
+      borderBottomColor: "#4657CE",
+      borderBottomWidth: 1,
+      width: "40%",
+      textAlign: "center",
+    },
+    innerText: {
+        color: 'red'
+    },
+  });
 
-export default App;
+ 
+ export default App;
+ 
